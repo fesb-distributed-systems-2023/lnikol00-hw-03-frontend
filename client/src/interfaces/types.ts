@@ -9,11 +9,7 @@ export type Plane = {
     captain: string
 }
 
-export type PlaneListState = {
-    planes: Plane[]
-    loading?: boolean
-    error?: string
-}
+export type PlaneList = Array<Plane>
 
 export type PaginationProps = {
     totalPlanes: number
