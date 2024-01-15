@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { useParams } from 'react-router-dom';
-import testImage from "../../utils/images/test.jpg"
+import { useNavigate, useParams } from 'react-router-dom';
+import * as AiIcons from "react-icons/ai"
+import * as FaIcons from "react-icons/fa"
 import { Plane } from '../../interfaces/types';
 import { baseURL } from '../../hooks/baseURL';
 import axios, { AxiosError } from 'axios';
@@ -29,7 +30,7 @@ function PlaneDetails() {
                     setErrMsg("No server response!")
                 }
                 else if (err.response?.status === 404) {
-                    setErrMsg("Plane not found!")
+                    setErrMsg(`${err.response.data}`)
                 }
                 if (errRef.current)
                     errRef.current.focus();
@@ -38,11 +39,36 @@ function PlaneDetails() {
         getSinglePlane();
     }, [params])
 
+    const navigate = useNavigate()
+
+    const handleDelete = async () => {
+        try {
+            if (window.confirm("Are you sere you want to delete this plane?")) {
+                await axios.delete(`${baseURL}/api/Airport/${params.id}`)
+                console.log("Plane deleted")
+                navigate("/")
+            }
+        } catch (error) {
+            const err = error as AxiosError
+            if (err.response?.status === 404) {
+                setErrMsg(`${err.response.data}`)
+            }
+            if (errRef.current)
+                errRef.current.focus();
+        }
+    }
+
+    const handleUpdate = () => {
+        navigate(`/update/${params.id}`)
+    }
+
     return (
+
+
         <div className='flex md:flex-row flex-col justify-start items-center md:p-[5rem] p-[1.5rem] '>
             <p
                 ref={errRef}
-                className={errMsg ? 'bg-[lightpink] text-[firebrick] font-bold p-2 my-2 w-screen' : 'absolute left-[-9999px]'}
+                className={errMsg ? 'bg-[lightpink] text-[firebrick] font-bold p-2 my-2 md:w-screen w-[80%]' : 'absolute left-[-9999px]'}
                 aria-live="assertive"
             >
                 {errMsg}
@@ -57,17 +83,29 @@ function PlaneDetails() {
                             className='w-[100%] md:h-[450px] h-[200px]'
                         />
                     </div>
-                    <div className='flex justify-center items-center flex-col md:w-[50%] w-[100%] md:px-[2em] md:py-[0em] py-[0.75em] gap-5'>
+                    <div className='flex justify-center items-center flex-col md:w-[50%] w-[100%] md:px-[2em] md:py-[0em] py-[0.75em] md:gap-5 gap-3'>
                         <span className='text-xl'><b>Model: </b>{plane?.model}</span>
                         <span className='text-xl'><b>Year: </b>{plane?.year}</span>
                         <span className='text-xl'><b>Country: </b>{plane?.country}</span>
                         <span className='text-xl'><b>Capacity: </b>{plane?.capacity}</span>
                         <span className='text-xl'><b>Type: </b>{plane?.type}</span>
                         <span className='text-xl'><b>Captain: </b>{plane?.captain}</span>
+                        <div className='flex justify-center items-center gap-10 text-xl'>
+                            <div
+                                onClick={handleDelete}
+                                className='flex justify-center items-center bg-[red] text-white w-10 h-8 rounded-lg p-1 cursor-pointer'>
+                                <AiIcons.AiOutlineDelete />
+                            </div>
+                            <div onClick={handleUpdate} className='text-[green] cursor-pointer'>
+                                <FaIcons.FaPen />
+                            </div>
+                        </div>
                     </div>
                 </>
             }
         </div >
+
+
     )
 }
 
